@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["dles"]
+
+[project]
+name = "dles"
+version = "0.0.1"
+authors = [
+  { name="Philipp Huber, Charlotte Debus", email="philipp.huber@kit.edu"},
+]
+description = "Deep learns electronic structures"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: BSD License",
+    "Development Status :: 3 - Alpha",
+]
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "h5py",
+    "pyscf"
+]
+
+[tool.ruff]
+# Same as Black.
+line-length = 132
+indent-width = 4
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".pyenv",
+    ".ruff_cache",
+    ".venv",
+    "__pypackages__",
+    "site-packages",
+    "venv",
+]
