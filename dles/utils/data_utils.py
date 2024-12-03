@@ -10,6 +10,8 @@ from ase import data
 from ase import Atoms
 from ase.io import write
 
+from dles.hf.molecule import Molecule
+
 
 class DataManager:
     """
@@ -19,6 +21,8 @@ class DataManager:
     __________
     paths : dict
         Paths to data.
+    keys : list
+        Molecular formulas / keys of dataset
     """
 
     def __init__(self):
@@ -30,6 +34,7 @@ class DataManager:
         """
 
         self.paths = {}
+        self.keys = []
 
     def add_path(self, name: str, path: Path) -> None:
         """
@@ -46,20 +51,65 @@ class DataManager:
         if str(name) in datasets:
             self.paths[name] = path
 
-    def explore_ani1(self) -> None:
+    def get_keys(self) -> None:
+        """
+        Get molecular formulas / keys of dataset.
+        """
+        self.keys = []
+        with h5py.File(self.paths["ani1"], "r") as h5file:
+            for key in h5file.keys():
+                self.keys.append(str(key))
+
+    def explore_ani1(self, dataset: list = None, print_all: bool = False) -> None:
         """
         Exploration of data. Makes some statistics.
+
+        Parameters
+        __________
+        dataset : list
+            List of keys / molecular formulas of dataset.
+        print_all : bool
+            Print information for all keys if True.
         """
+
         with h5py.File(self.paths["ani1"], "r") as h5file:
-            maxan = 0
-            for key in h5file.keys():
-                maxan = max(max(np.array(h5file[key]["atomic_numbers"])), maxan)
-            for num1, key1 in enumerate(h5file.keys()):
-                print(key1)
-                c = np.array(h5file[key1]["coordinates"])
-                atomic_numbers = np.array(h5file[key1]["atomic_numbers"])
-                number_of_atoms = len(atomic_numbers)
-                print(number_of_atoms, c.shape[0])
+            total_num_structures = 0
+            for key in dataset:
+                c = np.array(h5file[key]["coordinates"])
+                atomic_numbers = np.array(h5file[key]["atomic_numbers"])
+                total_num_structures = total_num_structures + c.shape[0]
+                if print_all:
+                    print(f'Formula: {key}')
+                    print(f'Number of atoms: {len(atomic_numbers)}')
+                    print(f'Number of configurations: {c.shape[0]}')
+                    print(f'{40*"_"}')
+            print(f'Total number of configurations: {total_num_structures}')
+            print(f'Total number of molecular formulas: {len(dataset)}')
+            print(40 * '*')
+
+    def memory_estimation(self, dataset: list = None) -> None:
+        """
+        Estimates required memory.
+
+        Parameters
+        dataset : list
+            List of keys / molecular formulas of dataset.
+        __________
+        """
+        m_4c_total = 0
+        m_2c_total = 0
+        for key in dataset:
+            atomic_numbers, coordinates = self.get_ani1_data(key)
+            M = Molecule(atomic_numbers, coordinates[0, :, :], basis='def2-SVP')
+            num_conf = coordinates.shape[0]
+            memory = M.make_memory_estimate()
+            m_4c = (memory["mem_2e"] / 1024 ** 3) * num_conf
+            m_2c = (memory["mem_1e"] / 1024 ** 3) * num_conf
+            m_2c_total = m_2c_total + m_2c
+            m_4c_total = m_4c_total + m_4c
+        print(f'Total memory needed for 4c integrals: {m_4c_total} GiB')
+        print(f'Total memory needed for 2c integrals: {m_2c_total} GiB')
+        print(f'Total memory: {m_4c_total + m_2c_total * 4} GiB')
 
     def define_subset_ani1(self, max_num_non_h) -> list:
         """
@@ -145,5 +195,3 @@ class DataManager:
                     write(f'{out_path}/{key}_structures.{file_format}', structures)
                 elif file_format == 'coord':
                     write(f'{out_path}/{file_format}', structures)
-
-

@@ -1,6 +1,6 @@
 import numpy as np
 
-from pyscf import gto
+from pyscf import gto, df
 
 
 class Molecule(gto.Mole):
@@ -46,7 +46,7 @@ class Molecule(gto.Mole):
         """
         Initialize the parent gto.Mole class
 
-        parameters
+        Parameters
         __________
         atomic numbers : np.ndarray
             Atomic numbers of ith atom.
@@ -68,3 +68,21 @@ class Molecule(gto.Mole):
         self.charge = charge
         self.spin = spin
         self.build()
+
+    def make_memory_estimate(self) -> dict:
+        """
+        Gives an estimation for required memory
+
+        Returns
+        _______
+        memory : dict
+            Memory required for arrays.
+        """
+        memory = {}
+        nao = self.nao
+        size_eri = (nao*(nao+1)//2) * (((nao*(nao+1)//2) + 1) // 2)
+        m_eri = (size_eri * 8)  # in bytes
+        memory['mem_2e'] = m_eri
+        m_h1e = nao**2 * 8
+        memory['mem_1e'] = m_h1e
+        return memory
