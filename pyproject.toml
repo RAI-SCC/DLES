@@ -45,4 +45,5 @@ exclude = [
     "__pypackages__",
     "site-packages",
     "venv",
+    "*.log",
 ]
