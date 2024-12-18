@@ -6,7 +6,6 @@ from typing import Tuple
 import h5py
 import numpy as np
 import ase
-from ase import data
 from ase import Atoms
 from ase.io import write
 
@@ -100,9 +99,9 @@ class DataManager:
         m_2c_total = 0
         for key in dataset:
             atomic_numbers, coordinates = self.get_ani1_data(key)
-            M = Molecule(atomic_numbers, coordinates[0, :, :], basis='def2-SVP')
+            m = Molecule(atomic_numbers, coordinates[0, :, :], basis='def2-SVP')
             num_conf = coordinates.shape[0]
-            memory = M.make_memory_estimate()
+            memory = m.make_memory_estimate()
             m_4c = (memory["mem_2e"] / 1024 ** 3) * num_conf
             m_2c = (memory["mem_1e"] / 1024 ** 3) * num_conf
             m_2c_total = m_2c_total + m_2c
@@ -113,7 +112,7 @@ class DataManager:
 
     def define_subset_ani1(self, max_num_non_h) -> list:
         """
-        Exploration of data. Makes some statistics.
+        defines a subset of the data to include only structures with a number of non-hydrogen atoms below a specified threshold.
 
         Parameters
         __________
