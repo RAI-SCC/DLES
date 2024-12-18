@@ -8,22 +8,26 @@ import h5py
 
 from dles.utils import set_logger
 
+# Reads data from source. Code for saving data as hdf5 is not written yet.
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-l', '--logging', default=logging.INFO, type=int, help='Logging level.')
-
+    parser.add_argument("-sp", "--source_path", default=None, type=Path, help="Source of Data")
+    parser.add_argument("-tp", "--target_path", default=None, type=Path, help="File to be saved as hdf5.")
     args = parser.parse_args()
     set_logger(args.logging)
 
-    qmugs_sdf_path = Path("/Users/philipphuber/Documents/Projects/DLES/Data/qmugs/structures")
-    qmugs_hdf_path = Path("/Users/philipphuber/Documents/Projects/DLES/Data/qmugs/qmugs.hdf5")
-    with h5py.File(qmugs_hdf_path, "r") as h5file:
-        for num1, entry1 in enumerate(qmugs_sdf_path.iterdir()):
-            path1 = qmugs_sdf_path / entry1
-            if num1 == 5: break
-            for num2, entry2 in enumerate(path1.iterdir()):
-                path2 = path1 / entry2
-                ase.io.read(path2)
-                print(path2)
+    source_directory = args.source_path
+    target_path = args.target_path
+    if not Path.exists(source_directory):
+        raise FileNotFoundError("Please give a valid path to data.")
+    if ".h5" != str(target_path)[-3:]:
+        raise ValueError("Please save data in an h5-format.")
 
+    with h5py.File(target_path, "w") as h5file:
+        for formula in source_directory.iterdir():
+            source_path = source_directory / formula
+            for entry in source_path.iterdir():
+                path = source_path / entry
+                atoms = ase.io.read(path)
