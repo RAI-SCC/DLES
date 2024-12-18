@@ -6,7 +6,7 @@
 
 # Deep Learning Electronic Structure
 DLES is a Python package to load and manipulate molecule data using [ASE](https://wiki.fysik.dtu.dk/ase/) and to carry out quantum chemistry methods using [PySCF](https://pyscf.org).
-It is an ongoing project, which will be further developed for deep learning applications. 
+It is an REAongoing project, which will be further developed for deep learning applications. 
 
 
 ## Installation
