@@ -5,8 +5,8 @@
 [![](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
 
 # Deep Learning Electronic Structure
-DLES is a Python package to load and manipulate molecule data using [ASE](https://wiki.fysik.dtu.dk/ase/) and to carry out quantum chemistry methods using [PySCF](https://pyscf.org).
-It is an REAongoing project, which will be further developed for deep learning applications. 
+DLES is a Python package to load and manipulate molecule data using [ASE](https://wiki.fysik.dtu.dk/ase/)  (Atomic Simulation Environment) and to carry out quantum chemistry methods using [PySCF](https://pyscf.org).
+It is an ongoing project, which will be further developed for deep learning (DL) applications. 
 
 
 ## Installation
@@ -16,9 +16,9 @@ Clone the project https://github.com/RAI-SCC/DLES.git and install it with `pip i
 ## Data Handling
 
 DLES is able to
-- read chemical structure data from HDF5 files with a certain structure.
-- save specific structures as coord- or xyz-files using [ASE](https://wiki.fysik.dtu.dk/ase/) (atomic simulation environment)
-- make memory estimation for matrices generated during Hartree-Fock computations
+- read chemical structures data from HDF5 files.
+- save specific structures as coord- or xyz-files using [ASE](https://wiki.fysik.dtu.dk/ase/).
+- make memory estimation for matrices generated during Hartree-Fock computations.
 
 ## Hartree-Fock Computations
 DLES imports [PySCF](https://pyscf.org) to systematically carry out restricted Hartree-Fock computations.
