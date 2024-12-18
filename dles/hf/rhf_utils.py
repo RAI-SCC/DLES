@@ -36,13 +36,19 @@ def make_mf(m: Molecule = None, dens_fit: bool = False, auxbasis: str = None) ->
     mf.max_cycle = 50
     mf.kernel()
 
+    # How to get specific values from converges RHF calculations:
+    nao = m.nao  # Number of atomic basis functions sum_(cGTO_i) (2l_i+1) (cGTO_i)
+    nuc = mf.energy_nuc()  # Nuclear potential
     h1e = mf.get_hcore()  # Core Hamiltonian with m.intor_symmetric(), 'int1e_kin' + 'int1e_nuc'
     s1e = mf.get_ovlp()  # Overlap matrix S with intor_symmetric('int1e_ovlp')
-    f = mf.get_fock()  # Fock matrix
-    eig, mo_coeff = mf.eig(f, s1e)  # Solves HC = SCE with scipy.linalg.eigh(f, s1e)
-    dm = mf.make_rdm1()  # Density matrix
     mo_occ = mf.mo_occ  # Electron occupation numbers
-    nao = m.nao  # Number of atomic basis functions sum_(cGTO_i) (2l_i+1) (cGTO_i)
+    f = mf.get_fock()  # Fock matrix
+    mo_coeff = mf.mo_coeff  # MO coefficients
+    dm = mf.make_rdm1()  # Density matrix
+    eig = mf.mo_energy  # Eigenvalues
+
+    # Solve Eigenvalue problem HC = SCE with scipy.linalg.eigh(f, s1e):
+    # eig, mo_coeff = mf.eig(f, s1e)
 
     start_time = time.time()
     # get ERI or DF-ERI
@@ -66,22 +72,24 @@ def make_mf(m: Molecule = None, dens_fit: bool = False, auxbasis: str = None) ->
         # Calculate Potentials J and K without density fitting
         vj, vk = scf.hf.dot_eri_dm(eri, dm, hermi=1, with_j=True, with_k=True)
         qc_parameters['eri'] = eri
-
     end_time = time.time()
     print(f'Time1: {end_time - start_time} s')
+
+    # Calculate energies directly from vhf/eri
     vhf = vj - vk * .5  # HF potential: mf.get_veff(m, dm, hermi=1)
     e_elec = mf.energy_elec(dm, h1e, vhf)  # Electronic energy
-    nuc = mf.energy_nuc()  # Nuclear potential
     e_tot = e_elec[0] + nuc  # Total energy
 
-    start_time = time.time()
-    eri_ref = m.intor("int2e").reshape((nao, nao, nao, nao))
-    vj_check = np.einsum('ijkl,kl->ij', eri_ref, dm)
-    vk_check = np.einsum('ilkj,kl->ij', eri_ref, dm)
-    end_time = time.time()
-    print(f'Time2: {end_time - start_time} s')
-    vhf = vj_check - vk_check * .5  # HF potential: mf.get_veff(m, dm, hermi=1)
-    e_elec = mf.energy_elec(dm, h1e, vhf)  # Electronic energy
+    test_einsum = False
+    if test_einsum:
+        start_time = time.time()
+        eri_ref = m.intor("int2e").reshape((nao, nao, nao, nao))
+        vj_check = np.einsum('ijkl,kl->ij', eri_ref, dm)
+        vk_check = np.einsum('ilkj,kl->ij', eri_ref, dm)
+        end_time = time.time()
+        print(f'Time2: {end_time - start_time} s')
+        vhf = vj_check - vk_check * .5  # HF potential: mf.get_veff(m, dm, hermi=1)
+        e_elec = mf.energy_elec(dm, h1e, vhf)  # Electronic energy
 
     qc_parameters['e_tot'] = e_tot
     qc_parameters['nuc'] = nuc

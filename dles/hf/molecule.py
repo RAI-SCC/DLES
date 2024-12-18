@@ -1,6 +1,6 @@
 import numpy as np
 
-from pyscf import gto, df
+from pyscf import gto
 
 
 class Molecule(gto.Mole):
