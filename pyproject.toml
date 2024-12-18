@@ -24,7 +24,9 @@ dependencies = [
     "numpy",
     "scipy",
     "h5py",
-    "pyscf"
+    "pyscf",
+    "colorlog",
+    "ase",
 ]
 
 [tool.ruff]
